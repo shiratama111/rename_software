@@ -1,4 +1,4 @@
-# Stable Diffusionプロンプト抽出ツール
+﻿# Stable Diffusionプロンプト抽出ツール
 
 PNG画像に埋め込まれたStable Diffusionのポジティブプロンプトを一括抽出するツールです。
 
