@@ -11,10 +11,18 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import os
+import locale
 
 
 def main():
     """メインGUIアプリケーションの処理"""
+    # エンコーディング設定
+    if sys.platform == 'win32':
+        # Windows環境でUTF-8を使用
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+    
     # tkinterのルートウィンドウを作成（非表示）
     root = tk.Tk()
     root.withdraw()
@@ -80,8 +88,30 @@ def main():
     
     # Pythonスクリプトを実行
     try:
-        result = subprocess.run([sys.executable, str(extract_script), str(folder)], 
-                              capture_output=True, text=True, encoding='utf-8')
+        # Windows環境でのエンコーディング問題を回避
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+        
+        # subprocessのエンコーディングを明示的に設定
+        if sys.platform == 'win32':
+            # Windowsの場合、UTF-8を強制
+            result = subprocess.run(
+                [sys.executable, '-X', 'utf8', str(extract_script), str(folder)], 
+                capture_output=True, 
+                text=True, 
+                encoding='utf-8',
+                errors='replace',
+                env=env
+            )
+        else:
+            result = subprocess.run(
+                [sys.executable, str(extract_script), str(folder)], 
+                capture_output=True, 
+                text=True, 
+                encoding='utf-8',
+                errors='replace',
+                env=env
+            )
         
         if result.returncode == 0:
             # 成功時、出力ファイルの場所を取得して表示

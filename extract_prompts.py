@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Stable Diffusionメタデータ抽出ツール
@@ -126,18 +126,35 @@ class PromptProcessor:
         
         # ログ設定
         self._setup_logging()
+        
+        # Windows環境でのエンコーディング問題を回避
+        if sys.platform == 'win32':
+            import codecs
+            # stdout/stderrをUTF-8でラップ
+            if hasattr(sys.stdout, 'buffer'):
+                sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+            if hasattr(sys.stderr, 'buffer'):
+                sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
     
     def _setup_logging(self):
         """ログ設定"""
         log_file = self.target_folder / 'error.log'
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file, encoding='utf-8'),
-                logging.StreamHandler(sys.stdout)
-            ]
-        )
+        
+        # 既存のハンドラをクリア
+        logger = logging.getLogger()
+        logger.handlers = []
+        
+        # ファイルハンドラ（BOMなしUTF-8）
+        file_handler = logging.FileHandler(log_file, encoding='utf-8', mode='a')
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        
+        # コンソールハンドラ
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
+        logger.setLevel(logging.INFO)
     
     def process_folder(self) -> Tuple[str, int, int, float]:
         """
@@ -235,7 +252,9 @@ class PromptProcessor:
             output_file: 出力ファイルパス
             results: (ファイル名, プロンプト) のリスト
         """
-        with open(output_file, 'w', encoding='utf-8') as f:
+        # BOMなしのUTF-8で保存
+        with open(output_file, 'w', encoding='utf-8-sig' if sys.platform == 'win32' else 'utf-8') as f:
+            # WindowsではUTF-8 BOM付きで保存（メモ帳等での文字化け防止）
             for filename, prompt in results:
                 f.write(f"{filename}のprompt\n{prompt}\n\n")
 
