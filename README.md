@@ -1,76 +1,60 @@
-﻿# Stable Diffusionプロンプト抽出ツール
+# Stable Diffusionプロンプト抽出ツール
 
-PNG画像に埋め込まれたStable Diffusionのポジティブプロンプトを一括抽出するツールです。
+PNG画像に埋め込まれたStable Diffusionのプロンプトを一括抽出する、使いやすいGUIツールです。
 
-## 機能
+## 主な特徴
 
-- PNG画像からポジティブプロンプトを自動抽出
-- 最大1,000枚まで一括処理
-- マルチスレッド処理による高速化
-- エラーログ出力
-- Windows向けドラッグ＆ドロップ対応
+- 🖱️ **直感的なGUIインターフェース** - フォルダ選択ダイアログで簡単操作
+- ⚡ **高速処理** - マルチスレッドによる並列処理で最大1,000枚を一括抽出
+- 🎨 **幅広い互換性** - Stable Diffusion WebUI、ComfyUIなど各種ツールに対応
+- 📝 **整理された出力** - ファイル名とプロンプトを見やすく整理してテキスト保存
+- 🔧 **柔軟な実行方法** - スタンドアロン実行ファイルまたはPython環境で動作
 
-## 必要環境
+## クイックスタート
 
-- Python 3.8以上（開発時はPython 3.12推奨）
-- Windows 10/11（64-bit）
+### 方法1: 実行ファイル版（推奨）
 
-## インストール
+1. [Releases](../../releases)から最新版をダウンロード
+2. `prompt_extractor_gui.exe`をダブルクリック
+3. PNG画像が含まれるフォルダを選択
+4. 処理完了！選択したフォルダ内に結果が保存されます
 
-### Python環境での実行
+### 方法2: Python環境での実行
 
-1. 必要なパッケージをインストール:
 ```bash
+# 依存関係をインストール
 pip install -r requirements.txt
+
+# GUIを起動
+python main_gui.py
+# または
+main_gui.bat
 ```
 
-### スタンドアロン版（.exe）の作成
+## システム要件
 
-1. PyInstallerをインストール:
-```bash
-pip install pyinstaller
-```
-
-2. ビルドスクリプトを実行:
-```bash
-python build_exe.py
-```
+- **OS**: Windows 10/11（64-bit）
+- **Python**: 3.8以上（Python環境で実行する場合）
+- **メモリ**: 4GB以上推奨
 
 ## 使い方
 
-### 方法1: インタラクティブモード（推奨）
+### GUIモード（メイン）
 
-実行ファイルまたはバッチファイルをダブルクリックすると、以下の選択肢が表示されます：
+1. アプリケーションを起動
+2. フォルダ選択ダイアログでPNG画像があるフォルダを選択
+3. 確認ダイアログで画像数を確認して「続行」
+4. 処理完了後、結果ファイルの場所が表示されます
+5. 「フォルダを開く」を選択すると自動的にエクスプローラーが開きます
 
-1. **フォルダ選択ダイアログを開く** - GUIでフォルダを選択（推奨）
-2. **フォルダパスを直接入力** - パスを手動で入力
-3. **現在のフォルダを使用** - 実行ファイルがあるフォルダを処理
+### CLIモード（上級者向け）
 
-### 方法2: GUI版（Python環境）
-
-```bash
-python extract_prompts_gui.py
-# または
-extract_prompts_gui.bat
-```
-
-フォルダ選択ダイアログが開き、視覚的にフォルダを選択できます。
-
-### 方法3: ドラッグ＆ドロップ
-
-1. `extract_prompts.bat`（Python環境）または`extract_prompts_standalone.bat`（.exe版）を使用
-2. 画像フォルダをバッチファイルにドラッグ＆ドロップ
-
-### 方法4: コマンドライン
+コマンドラインから直接実行することも可能です：
 
 ```bash
-# 現在のフォルダを処理
-python extract_prompts.py
-
-# 特定のフォルダを処理
 python extract_prompts.py "C:\path\to\images"
 
-# ワーカー数を指定（デフォルト: 4）
+# ワーカー数を指定
 python extract_prompts.py "C:\path\to\images" --workers 8
 ```
 
@@ -80,51 +64,97 @@ python extract_prompts.py "C:\path\to\images" --workers 8
 
 ```
 image1.pngのprompt
-a beautiful landscape, highly detailed, 4k resolution
+masterpiece, best quality, 1girl, solo, long hair, school uniform
 
 image2.pngのprompt
-portrait of a young woman, professional photography
+landscape, mountain, sunset, highly detailed, 4k
 
 ...
 ```
 
-### 出力ファイルの詳細
-
 - **ファイル名**: `prompts_YYYYMMDD_HHMMSS.txt`
-- **文字コード**: UTF-8（BOMあり）
-- **保存場所**: **選択したPNG画像フォルダ内に直接保存されます**
+- **保存場所**: 選択したPNG画像フォルダ内
+- **文字コード**: UTF-8
 
-### 処理完了後
+## ビルド方法（開発者向け）
 
-1. 出力ファイルの場所が画面に表示されます
-2. 「フォルダを開きますか？」と確認されます
-3. 「Y」を選択すると、エクスプローラーが自動的に開きます
-
-**例**: `C:\Users\名前\Pictures\AI画像` を選択した場合
-→ `C:\Users\名前\Pictures\AI画像\prompts_20250629_170000.txt` が作成されます
-
-## テスト
-
-テスト用画像を作成して動作確認:
+### 実行ファイルのビルド
 
 ```bash
-python test_extract.py
-python extract_prompts.py test_images
+# ビルドスクリプトを実行
+build.bat
+
+# または手動でビルド
+pip install pyinstaller
+python build_gui_exe.py
 ```
+
+### ビルドオプション
+
+```bash
+# GUI版のみ（デフォルト）
+python build_gui_exe.py
+
+# GUI版とCLI版の両方
+python build_gui_exe.py --both
+
+# ポータブルパッケージも作成
+python build_gui_exe.py --package
+```
+
+## トラブルシューティング
+
+### Windows Defenderの警告が出る場合
+
+自作の実行ファイルのため、初回実行時に警告が表示される場合があります：
+1. 「詳細情報」をクリック
+2. 「実行」をクリック
+
+### プロンプトが抽出されない場合
+
+- PNG画像にメタデータが含まれているか確認してください
+- 対応形式：Stable Diffusion WebUI、ComfyUI、NovelAIなど
+- JPEG、WebPなどは非対応です
+
+### エラーが発生する場合
+
+- `error.log`ファイルを確認してください
+- Python環境の場合は依存関係を再インストール：`pip install -r requirements.txt --upgrade`
 
 ## 制限事項
 
-- PNG画像のみ対応（JPG、WEBP等は非対応）
+- PNG画像のみ対応（JPEG、WebP等は非対応）
 - ポジティブプロンプトのみ抽出（ネガティブプロンプトは非対応）
-- サブフォルダは検索対象外
-- 最大処理数: 1,000枚/回
+- サブフォルダ内の画像は処理対象外
+- 一度に処理できる最大枚数：1,000枚
 
-## エラー処理
+## 開発
 
-- プロンプトが見つからない画像はスキップ
-- エラー詳細は`error.log`に記録
-- 処理中のエラーでもプログラムは継続実行
+### プロジェクト構造
+
+```
+rename_software/
+├── main_gui.py          # メインGUIアプリケーション
+├── extract_prompts.py   # コア抽出エンジン
+├── build_gui_exe.py     # ビルドスクリプト
+├── main_gui.bat         # Windows用起動バッチ
+├── build.bat            # ビルド用バッチ
+├── requirements.txt     # Python依存関係
+└── README.md           # このファイル
+```
+
+### 貢献
+
+プルリクエストを歓迎します！バグ報告や機能要望は[Issues](../../issues)へ。
 
 ## ライセンス
 
 MIT License
+
+## 作者
+
+[あなたの名前]
+
+---
+
+⚡ Powered by Python, PIL, and PyInstaller

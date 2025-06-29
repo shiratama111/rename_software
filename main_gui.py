@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Stable Diffusionプロンプト抽出ツール - GUI版
-フォルダ選択ダイアログから簡単に実行
+Stable Diffusionプロンプト抽出ツール - メインGUIアプリケーション
+PNG画像からプロンプトを抽出する使いやすいGUIインターフェース
 """
 
 import sys
@@ -14,7 +14,7 @@ import os
 
 
 def main():
-    """GUI版のメイン処理"""
+    """メインGUIアプリケーションの処理"""
     # tkinterのルートウィンドウを作成（非表示）
     root = tk.Tk()
     root.withdraw()
@@ -22,8 +22,12 @@ def main():
     
     # タイトル表示
     messagebox.showinfo(
-        "プロンプト抽出ツール",
+        "Stable Diffusionプロンプト抽出ツール",
         "PNG画像からStable Diffusionのプロンプトを抽出します。\n\n"
+        "機能:\n"
+        "・最大1,000枚のPNG画像を一括処理\n"
+        "・マルチスレッドによる高速処理\n"
+        "・抽出結果をテキストファイルに保存\n\n"
         "次の画面で画像が含まれるフォルダを選択してください。"
     )
     

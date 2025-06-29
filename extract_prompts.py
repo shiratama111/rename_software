@@ -206,15 +206,7 @@ class PromptProcessor:
         print(f"  フルパス: {output_file}")
         print("="*60)
         
-        # Windowsの場合、エクスプローラーで開くオプションを提供
-        if sys.platform == 'win32' and sys.stdin.isatty():
-            print("\nフォルダを開きますか？ (Y/N): ", end='')
-            try:
-                choice = input().strip().upper()
-                if choice == 'Y':
-                    os.startfile(str(output_file.parent))
-            except:
-                pass
+        # CLI版では自動的にフォルダを開かない（GUI版で処理）
         
         return str(output_file), success_count, error_count, elapsed_time
     
@@ -248,136 +240,16 @@ class PromptProcessor:
                 f.write(f"{filename}のprompt\n{prompt}\n\n")
 
 
-def select_folder_dialog() -> Optional[Path]:
-    """フォルダ選択ダイアログを表示"""
-    folder_path = None
-    
-    if sys.platform == 'win32':
-        # Windows: tkinterを使用
-        try:
-            import tkinter as tk
-            from tkinter import filedialog
-            
-            root = tk.Tk()
-            root.withdraw()  # メインウィンドウを非表示
-            root.attributes('-topmost', True)  # 最前面に表示
-            
-            folder_path = filedialog.askdirectory(
-                title='PNG画像が含まれるフォルダを選択してください',
-                initialdir=os.getcwd()
-            )
-            
-            root.destroy()
-            
-            if folder_path:
-                return Path(folder_path)
-        except ImportError:
-            # tkinterが利用できない場合
-            print("警告: フォルダ選択ダイアログが利用できません")
-    else:
-        # macOS/Linux: tkinterを試す
-        try:
-            import tkinter as tk
-            from tkinter import filedialog
-            
-            root = tk.Tk()
-            root.withdraw()
-            
-            folder_path = filedialog.askdirectory(
-                title='PNG画像が含まれるフォルダを選択してください',
-                initialdir=os.getcwd()
-            )
-            
-            root.destroy()
-            
-            if folder_path:
-                return Path(folder_path)
-        except:
-            print("警告: フォルダ選択ダイアログが利用できません")
-    
-    return None
+# GUI版で使用されるため、インタラクティブモードは削除
 
 
-def prompt_for_folder() -> Optional[Path]:
-    """フォルダ選択の対話的プロンプト"""
-    print("\n" + "="*60)
-    print("フォルダを選択してください")
-    print("="*60)
-    print("\n選択方法:")
-    print("1. フォルダ選択ダイアログを開く（推奨）")
-    print("2. フォルダパスを直接入力")
-    print("3. 現在のフォルダを使用")
-    print("4. 終了")
-    print("\n選択してください (1-4): ", end='')
-    
-    try:
-        choice = input().strip()
-        
-        if choice == '1':
-            # フォルダ選択ダイアログ
-            folder = select_folder_dialog()
-            if folder:
-                return folder
-            else:
-                print("\nフォルダが選択されませんでした。")
-                return None
-                
-        elif choice == '2':
-            # 直接入力
-            print("\nフォルダのパスを入力してください: ", end='')
-            path_str = input().strip()
-            if path_str:
-                folder = Path(path_str)
-                if folder.exists() and folder.is_dir():
-                    return folder
-                else:
-                    print(f"\nエラー: フォルダが見つかりません: {path_str}")
-                    return None
-            
-        elif choice == '3':
-            # 現在のフォルダ
-            return Path.cwd()
-            
-        elif choice == '4':
-            # 終了
-            return None
-            
-        else:
-            print("\n無効な選択です。")
-            return None
-            
-    except (EOFError, KeyboardInterrupt):
-        return None
-
-
-def show_error_and_wait(message: str):
-    """エラーメッセージを表示して入力を待つ"""
+def show_error(message: str):
+    """エラーメッセージを表示"""
     print("\n" + "="*60)
     print("エラーが発生しました")
     print("="*60)
     print(f"\n{message}\n")
     print("="*60)
-    print("\n対処方法:")
-    print("1. PNG画像が含まれるフォルダを指定してください")
-    print("2. コマンドラインから実行する場合:")
-    print("   extract_prompts.exe \"C:\\画像フォルダのパス\"")
-    print("3. またはextract_prompts_standalone.batに")
-    print("   画像フォルダをドラッグ＆ドロップしてください")
-    print("\n何かキーを押すと終了します...")
-    
-    # コンソールがある場合のみ入力を待つ
-    if sys.stdin.isatty():
-        try:
-            # Windowsの場合
-            if sys.platform == 'win32':
-                import msvcrt
-                msvcrt.getch()
-            else:
-                # Unix系の場合
-                input()
-        except:
-            # エラーが発生した場合は何もしない
-            pass
 
 
 def main():
@@ -402,27 +274,14 @@ def main():
         args = parser.parse_args()
         
         # フォルダパスを確認
-        if args.target_folder == '.' and sys.stdin.isatty():
-            # 引数なしで実行された場合、対話的にフォルダを選択
-            print("Stable Diffusionプロンプト抽出ツール")
-            print("="*60)
-            target_folder = prompt_for_folder()
-            if not target_folder:
-                print("\nフォルダが選択されませんでした。終了します。")
-                if sys.platform == 'win32':
-                    print("\n何かキーを押すと終了します...")
-                    import msvcrt
-                    msvcrt.getch()
-                sys.exit(0)
-        else:
-            target_folder = Path(args.target_folder).resolve()
-            if not target_folder.exists():
-                show_error_and_wait(f"フォルダが存在しません: {target_folder}")
-                sys.exit(1)
-            
-            if not target_folder.is_dir():
-                show_error_and_wait(f"ディレクトリではありません: {target_folder}")
-                sys.exit(1)
+        target_folder = Path(args.target_folder).resolve()
+        if not target_folder.exists():
+            show_error(f"フォルダが存在しません: {target_folder}")
+            sys.exit(1)
+        
+        if not target_folder.is_dir():
+            show_error(f"ディレクトリではありません: {target_folder}")
+            sys.exit(1)
         
         print(f"対象フォルダ: {target_folder}")
         
@@ -432,27 +291,15 @@ def main():
         
         # PNG画像が見つからなかった場合の処理
         if success_count == 0 and error_count == 0:
-            show_error_and_wait(
+            show_error(
                 f"指定されたフォルダにPNG画像が見つかりませんでした。\n"
                 f"フォルダ: {target_folder}\n\n"
                 f"PNG形式の画像ファイルが含まれているか確認してください。"
             )
             sys.exit(1)
-        
-        # 処理完了後、少し待機（コンソールがある場合のみ）
-        if sys.stdin.isatty():
-            print("\n処理が完了しました。何かキーを押すと終了します...")
-            try:
-                if sys.platform == 'win32':
-                    import msvcrt
-                    msvcrt.getch()
-                else:
-                    input()
-            except:
-                pass
             
     except Exception as e:
-        show_error_and_wait(f"予期しないエラーが発生しました:\n{str(e)}")
+        show_error(f"予期しないエラーが発生しました:\n{str(e)}")
         sys.exit(1)
 
 
