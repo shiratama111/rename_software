@@ -5,24 +5,53 @@ echo.
 
 if "%~1"=="" (
     echo ============================================================
-    echo 使い方:
-    echo.
-    echo 1. PNG画像が入っているフォルダを用意してください
-    echo 2. そのフォルダをこのファイルにドラッグ＆ドロップしてください
-    echo.
-    echo または、実行ファイルを直接ダブルクリックして、
-    echo 現在のフォルダから画像を検索することもできます。
+    echo Stable Diffusionプロンプト抽出ツール
     echo ============================================================
     echo.
-    echo 現在のフォルダで実行しますか？ (Y/N)
-    choice /C YN /M "選択してください"
-    if errorlevel 2 (
+    echo 実行方法を選択してください:
+    echo.
+    echo 1. フォルダ選択ダイアログを開く（推奨）
+    echo 2. 現在のフォルダで実行
+    echo 3. 使い方を表示
+    echo 4. 終了
+    echo.
+    choice /C 1234 /M "選択してください"
+    
+    if errorlevel 4 (
         echo 終了します。
         pause
         exit /b 0
     )
-    echo.
-    "%~dp0extract_prompts.exe"
+    
+    if errorlevel 3 (
+        echo.
+        echo ============================================================
+        echo 使い方:
+        echo.
+        echo 方法1: このファイルをダブルクリックして、
+        echo        メニューから「1」を選択
+        echo.
+        echo 方法2: PNG画像フォルダをこのファイルに
+        echo        ドラッグ＆ドロップ
+        echo.
+        echo 方法3: コマンドラインから実行
+        echo        extract_prompts.exe "フォルダパス"
+        echo ============================================================
+        pause
+        "%~f0"
+        exit /b 0
+    )
+    
+    if errorlevel 2 (
+        echo.
+        "%~dp0extract_prompts.exe"
+    )
+    
+    if errorlevel 1 (
+        echo.
+        echo フォルダ選択モードで起動しています...
+        "%~dp0extract_prompts.exe"
+    )
 ) else (
     echo 対象フォルダ: %~1
     echo.

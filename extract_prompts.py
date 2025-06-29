@@ -14,6 +14,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional, Tuple, List
 import time
+import platform
 
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -230,6 +231,108 @@ class PromptProcessor:
                 f.write(f"{filename}のprompt\n{prompt}\n\n")
 
 
+def select_folder_dialog() -> Optional[Path]:
+    """フォルダ選択ダイアログを表示"""
+    folder_path = None
+    
+    if sys.platform == 'win32':
+        # Windows: tkinterを使用
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            
+            root = tk.Tk()
+            root.withdraw()  # メインウィンドウを非表示
+            root.attributes('-topmost', True)  # 最前面に表示
+            
+            folder_path = filedialog.askdirectory(
+                title='PNG画像が含まれるフォルダを選択してください',
+                initialdir=os.getcwd()
+            )
+            
+            root.destroy()
+            
+            if folder_path:
+                return Path(folder_path)
+        except ImportError:
+            # tkinterが利用できない場合
+            print("警告: フォルダ選択ダイアログが利用できません")
+    else:
+        # macOS/Linux: tkinterを試す
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            
+            root = tk.Tk()
+            root.withdraw()
+            
+            folder_path = filedialog.askdirectory(
+                title='PNG画像が含まれるフォルダを選択してください',
+                initialdir=os.getcwd()
+            )
+            
+            root.destroy()
+            
+            if folder_path:
+                return Path(folder_path)
+        except:
+            print("警告: フォルダ選択ダイアログが利用できません")
+    
+    return None
+
+
+def prompt_for_folder() -> Optional[Path]:
+    """フォルダ選択の対話的プロンプト"""
+    print("\n" + "="*60)
+    print("フォルダを選択してください")
+    print("="*60)
+    print("\n選択方法:")
+    print("1. フォルダ選択ダイアログを開く（推奨）")
+    print("2. フォルダパスを直接入力")
+    print("3. 現在のフォルダを使用")
+    print("4. 終了")
+    print("\n選択してください (1-4): ", end='')
+    
+    try:
+        choice = input().strip()
+        
+        if choice == '1':
+            # フォルダ選択ダイアログ
+            folder = select_folder_dialog()
+            if folder:
+                return folder
+            else:
+                print("\nフォルダが選択されませんでした。")
+                return None
+                
+        elif choice == '2':
+            # 直接入力
+            print("\nフォルダのパスを入力してください: ", end='')
+            path_str = input().strip()
+            if path_str:
+                folder = Path(path_str)
+                if folder.exists() and folder.is_dir():
+                    return folder
+                else:
+                    print(f"\nエラー: フォルダが見つかりません: {path_str}")
+                    return None
+            
+        elif choice == '3':
+            # 現在のフォルダ
+            return Path.cwd()
+            
+        elif choice == '4':
+            # 終了
+            return None
+            
+        else:
+            print("\n無効な選択です。")
+            return None
+            
+    except (EOFError, KeyboardInterrupt):
+        return None
+
+
 def show_error_and_wait(message: str):
     """エラーメッセージを表示して入力を待つ"""
     print("\n" + "="*60)
@@ -282,14 +385,27 @@ def main():
         args = parser.parse_args()
         
         # フォルダパスを確認
-        target_folder = Path(args.target_folder).resolve()
-        if not target_folder.exists():
-            show_error_and_wait(f"フォルダが存在しません: {target_folder}")
-            sys.exit(1)
-        
-        if not target_folder.is_dir():
-            show_error_and_wait(f"ディレクトリではありません: {target_folder}")
-            sys.exit(1)
+        if args.target_folder == '.' and sys.stdin.isatty():
+            # 引数なしで実行された場合、対話的にフォルダを選択
+            print("Stable Diffusionプロンプト抽出ツール")
+            print("="*60)
+            target_folder = prompt_for_folder()
+            if not target_folder:
+                print("\nフォルダが選択されませんでした。終了します。")
+                if sys.platform == 'win32':
+                    print("\n何かキーを押すと終了します...")
+                    import msvcrt
+                    msvcrt.getch()
+                sys.exit(0)
+        else:
+            target_folder = Path(args.target_folder).resolve()
+            if not target_folder.exists():
+                show_error_and_wait(f"フォルダが存在しません: {target_folder}")
+                sys.exit(1)
+            
+            if not target_folder.is_dir():
+                show_error_and_wait(f"ディレクトリではありません: {target_folder}")
+                sys.exit(1)
         
         print(f"対象フォルダ: {target_folder}")
         

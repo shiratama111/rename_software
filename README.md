@@ -38,7 +38,30 @@ python build_exe.py
 
 ## 使い方
 
-### コマンドライン
+### 方法1: インタラクティブモード（推奨）
+
+実行ファイルまたはバッチファイルをダブルクリックすると、以下の選択肢が表示されます：
+
+1. **フォルダ選択ダイアログを開く** - GUIでフォルダを選択（推奨）
+2. **フォルダパスを直接入力** - パスを手動で入力
+3. **現在のフォルダを使用** - 実行ファイルがあるフォルダを処理
+
+### 方法2: GUI版（Python環境）
+
+```bash
+python extract_prompts_gui.py
+# または
+extract_prompts_gui.bat
+```
+
+フォルダ選択ダイアログが開き、視覚的にフォルダを選択できます。
+
+### 方法3: ドラッグ＆ドロップ
+
+1. `extract_prompts.bat`（Python環境）または`extract_prompts_standalone.bat`（.exe版）を使用
+2. 画像フォルダをバッチファイルにドラッグ＆ドロップ
+
+### 方法4: コマンドライン
 
 ```bash
 # 現在のフォルダを処理
@@ -50,11 +73,6 @@ python extract_prompts.py "C:\path\to\images"
 # ワーカー数を指定（デフォルト: 4）
 python extract_prompts.py "C:\path\to\images" --workers 8
 ```
-
-### Windows ドラッグ＆ドロップ
-
-1. `extract_prompts.bat`（Python環境）または`extract_prompts_standalone.bat`（.exe版）を使用
-2. 画像フォルダをバッチファイルにドラッグ＆ドロップ
 
 ## 出力形式
 
