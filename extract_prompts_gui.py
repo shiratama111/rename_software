@@ -76,7 +76,43 @@ def main():
     
     # Pythonスクリプトを実行
     try:
-        subprocess.run([sys.executable, str(extract_script), str(folder)])
+        result = subprocess.run([sys.executable, str(extract_script), str(folder)], 
+                              capture_output=True, text=True, encoding='utf-8')
+        
+        if result.returncode == 0:
+            # 成功時、出力ファイルの場所を取得して表示
+            output_lines = result.stdout.split('\n')
+            output_file = None
+            
+            # 出力ファイルのパスを探す
+            for line in output_lines:
+                if 'フルパス:' in line:
+                    output_file = line.split('フルパス:')[1].strip()
+                    break
+            
+            if output_file and Path(output_file).exists():
+                # 処理完了のメッセージ
+                response = messagebox.askyesno(
+                    "処理完了",
+                    f"プロンプトの抽出が完了しました。\n\n"
+                    f"出力ファイル:\n{output_file}\n\n"
+                    f"フォルダを開きますか？"
+                )
+                
+                if response:
+                    # Windowsの場合、エクスプローラーで開く
+                    if sys.platform == 'win32':
+                        os.startfile(str(Path(output_file).parent))
+                    elif sys.platform == 'darwin':
+                        subprocess.run(['open', str(Path(output_file).parent)])
+                    else:
+                        subprocess.run(['xdg-open', str(Path(output_file).parent)])
+            else:
+                messagebox.showinfo("処理完了", "処理が完了しました。")
+        else:
+            # エラー時
+            messagebox.showerror("エラー", f"処理中にエラーが発生しました:\n{result.stderr}")
+            
     except Exception as e:
         print(f"エラー: {e}")
         messagebox.showerror("エラー", f"実行中にエラーが発生しました:\n{e}")

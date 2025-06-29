@@ -197,7 +197,24 @@ class PromptProcessor:
         print(f"  成功: {success_count}")
         print(f"  エラー: {error_count}")
         print(f"  処理時間: {elapsed_time:.2f}秒")
-        print(f"  出力ファイル: {output_file}")
+        
+        # 出力ファイルの場所を強調表示
+        print(f"\n" + "="*60)
+        print("出力ファイルが作成されました:")
+        print(f"  場所: {output_file.parent}")
+        print(f"  ファイル名: {output_file.name}")
+        print(f"  フルパス: {output_file}")
+        print("="*60)
+        
+        # Windowsの場合、エクスプローラーで開くオプションを提供
+        if sys.platform == 'win32' and sys.stdin.isatty():
+            print("\nフォルダを開きますか？ (Y/N): ", end='')
+            try:
+                choice = input().strip().upper()
+                if choice == 'Y':
+                    os.startfile(str(output_file.parent))
+            except:
+                pass
         
         return str(output_file), success_count, error_count, elapsed_time
     

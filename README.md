@@ -88,9 +88,20 @@ portrait of a young woman, professional photography
 ...
 ```
 
-- ファイル名: `prompts_YYYYMMDD_HHMMSS.txt`
-- 文字コード: UTF-8（BOMなし）
-- 保存場所: 処理対象フォルダ直下
+### 出力ファイルの詳細
+
+- **ファイル名**: `prompts_YYYYMMDD_HHMMSS.txt`
+- **文字コード**: UTF-8（BOMあり）
+- **保存場所**: **選択したPNG画像フォルダ内に直接保存されます**
+
+### 処理完了後
+
+1. 出力ファイルの場所が画面に表示されます
+2. 「フォルダを開きますか？」と確認されます
+3. 「Y」を選択すると、エクスプローラーが自動的に開きます
+
+**例**: `C:\Users\名前\Pictures\AI画像` を選択した場合
+→ `C:\Users\名前\Pictures\AI画像\prompts_20250629_170000.txt` が作成されます
 
 ## テスト
 
