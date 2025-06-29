@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 chcp 65001 > nul
 echo Stable Diffusionプロンプト抽出ツール
 echo.
