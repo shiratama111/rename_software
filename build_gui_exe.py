@@ -22,7 +22,6 @@ def build_gui_exe():
         '--onefile',  # 単一の実行ファイルを作成
         '--windowed',  # GUIアプリケーション（コンソールなし）
         '--name', 'prompt_extractor_gui',  # 実行ファイル名
-        '--icon', 'icon.ico' if os.path.exists('icon.ico') else None,  # アイコンがあれば使用
         '--add-data', 'requirements.txt;.',  # データファイルを含める（Windows用セミコロン）
         '--hidden-import', 'PIL._tkinter_finder',  # 隠れた依存関係
         '--hidden-import', 'tkinter',
@@ -32,8 +31,10 @@ def build_gui_exe():
         'main_gui.py'
     ]
     
-    # Noneを除去
-    command = [c for c in command if c is not None]
+    # アイコンファイルが存在する場合のみ追加
+    if os.path.exists('icon.ico'):
+        command.insert(5, '--icon')
+        command.insert(6, 'icon.ico')
     
     # ビルド実行
     result = subprocess.run(command, capture_output=True, text=True)

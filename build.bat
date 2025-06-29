@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 > nul
-title ビルドスクリプト - プロンプト抽出ツール
+title Build Script - Prompt Extractor
 
 echo ========================================
 echo Stable Diffusionプロンプト抽出ツール
