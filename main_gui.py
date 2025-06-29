@@ -126,10 +126,15 @@ def main():
             
             if output_file and Path(output_file).exists():
                 # 処理完了のメッセージ
+                yaml_file = output_file
+                txt_file = str(Path(output_file).with_suffix('.txt'))
+                
                 response = messagebox.askyesno(
                     "処理完了",
                     f"プロンプトの抽出が完了しました。\n\n"
-                    f"出力ファイル（YAML形式）:\n{output_file}\n\n"
+                    f"出力ファイル:\n"
+                    f"1. YAML形式（構造化）:\n   {Path(yaml_file).name}\n\n"
+                    f"2. テキスト形式（プロンプトのみ）:\n   {Path(txt_file).name}\n\n"
                     f"フォルダを開きますか？"
                 )
                 

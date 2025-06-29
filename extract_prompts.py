@@ -219,8 +219,14 @@ class PromptProcessor:
         print(f"\n" + "="*60)
         print("出力ファイルが作成されました:")
         print(f"  場所: {output_file.parent}")
-        print(f"  ファイル名: {output_file.name}")
-        print(f"  フルパス: {output_file}")
+        print("")
+        print("  1. YAML形式（構造化データ）:")
+        print(f"     ファイル名: {output_file.with_suffix('.yaml').name}")
+        print(f"     フルパス: {output_file.with_suffix('.yaml')}")
+        print("")
+        print("  2. テキスト形式（プロンプトのみ）:")
+        print(f"     ファイル名: {output_file.with_suffix('.txt').name}")
+        print(f"     フルパス: {output_file.with_suffix('.txt')}")
         print("="*60)
         
         # CLI版では自動的にフォルダを開かない（GUI版で処理）
@@ -246,7 +252,7 @@ class PromptProcessor:
     
     def _write_results(self, output_file: Path, results: List[Tuple[str, str]]):
         """
-        結果をファイルに書き込み（YAML形式）
+        結果をファイルに書き込み（YAML形式とテキスト形式の両方）
         
         Args:
             output_file: 出力ファイルパス
@@ -273,6 +279,17 @@ class PromptProcessor:
                 for line in prompt.strip().split('\n'):
                     f.write(f"    {line}\n")
                 f.write("\n")
+        
+        # テキストファイルにプロンプトのみを保存
+        txt_file = output_file.with_suffix('.txt')
+        with open(txt_file, 'w', encoding='utf-8-sig' if sys.platform == 'win32' else 'utf-8') as f:
+            # プロンプトのみを改行で区切って出力
+            for _, prompt in results:
+                f.write(prompt.strip())
+                f.write("\n\n---\n\n")  # プロンプト間の区切り
+            
+        # 両方のファイルパスを返すためにタプルを作成
+        self.output_files = (yaml_file, txt_file)
 
 
 # GUI版で使用されるため、インタラクティブモードは削除

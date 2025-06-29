@@ -60,7 +60,9 @@ python extract_prompts.py "C:\path\to\images" --workers 8
 
 ## 出力形式
 
-抽出されたプロンプトはYAML形式で保存されます：
+抽出されたプロンプトは**2つの形式**で同時に保存されます：
+
+### 1. YAML形式（構造化データ）
 
 ```yaml
 # Stable Diffusion Prompts
@@ -75,8 +77,28 @@ prompts:
     landscape, mountain, sunset, highly detailed, 4k
 ```
 
-- **ファイル名**: `prompts_YYYYMMDD_HHMMSS.yaml`
-- **形式**: YAML（キー: ファイル名（拡張子なし）、値: プロンプト）
+### 2. テキスト形式（プロンプトのみ）
+
+```
+masterpiece, best quality, 1girl, solo, long hair, school uniform
+
+---
+
+landscape, mountain, sunset, highly detailed, 4k
+
+---
+```
+
+### ファイル詳細
+
+- **YAML形式**: `prompts_YYYYMMDD_HHMMSS.yaml`
+  - ファイル名とプロンプトの対応が分かる
+  - プログラムでの処理に便利
+
+- **テキスト形式**: `prompts_YYYYMMDD_HHMMSS.txt`
+  - プロンプトのみをシンプルに保存
+  - コピー＆ペーストに便利
+
 - **保存場所**: 選択したPNG画像フォルダ内
 - **文字コード**: UTF-8（Windows環境ではBOM付き）
 
