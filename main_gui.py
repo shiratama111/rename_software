@@ -129,7 +129,7 @@ def main():
                 response = messagebox.askyesno(
                     "処理完了",
                     f"プロンプトの抽出が完了しました。\n\n"
-                    f"出力ファイル:\n{output_file}\n\n"
+                    f"出力ファイル（YAML形式）:\n{output_file}\n\n"
                     f"フォルダを開きますか？"
                 )
                 

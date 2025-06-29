@@ -171,9 +171,9 @@ class PromptProcessor:
             self.logger.warning("PNG画像が見つかりませんでした。")
             return "", 0, 0, 0
         
-        # 出力ファイル名
+        # 出力ファイル名（YAML形式）
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_file = self.target_folder / f'prompts_{timestamp}.txt'
+        output_file = self.target_folder / f'prompts_{timestamp}.yaml'
         
         success_count = 0
         error_count = 0
@@ -246,17 +246,33 @@ class PromptProcessor:
     
     def _write_results(self, output_file: Path, results: List[Tuple[str, str]]):
         """
-        結果をファイルに書き込み
+        結果をファイルに書き込み（YAML形式）
         
         Args:
             output_file: 出力ファイルパス
             results: (ファイル名, プロンプト) のリスト
         """
-        # BOMなしのUTF-8で保存
-        with open(output_file, 'w', encoding='utf-8-sig' if sys.platform == 'win32' else 'utf-8') as f:
-            # WindowsではUTF-8 BOM付きで保存（メモ帳等での文字化け防止）
+        # ファイル名を.yamlに変更
+        yaml_file = output_file.with_suffix('.yaml')
+        
+        # YAMLファイルに保存
+        with open(yaml_file, 'w', encoding='utf-8-sig' if sys.platform == 'win32' else 'utf-8') as f:
+            # YAMLヘッダー
+            f.write("# Stable Diffusion Prompts\n")
+            f.write(f"# Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"# Total images: {len(results)}\n\n")
+            
+            # プロンプトデータ
+            f.write("prompts:\n")
             for filename, prompt in results:
-                f.write(f"{filename}のprompt\n{prompt}\n\n")
+                # ファイル名から拡張子を除いてキーを生成
+                key = filename.replace('.png', '')
+                # プロンプトの改行を保持しつつ、YAMLのリテラルスタイルで出力
+                f.write(f"  {key}: |\n")
+                # プロンプトの各行をインデントして出力
+                for line in prompt.strip().split('\n'):
+                    f.write(f"    {line}\n")
+                f.write("\n")
 
 
 # GUI版で使用されるため、インタラクティブモードは削除
