@@ -230,41 +230,97 @@ class PromptProcessor:
                 f.write(f"{filename}のprompt\n{prompt}\n\n")
 
 
+def show_error_and_wait(message: str):
+    """エラーメッセージを表示して入力を待つ"""
+    print("\n" + "="*60)
+    print("エラーが発生しました")
+    print("="*60)
+    print(f"\n{message}\n")
+    print("="*60)
+    print("\n対処方法:")
+    print("1. PNG画像が含まれるフォルダを指定してください")
+    print("2. コマンドラインから実行する場合:")
+    print("   extract_prompts.exe \"C:\\画像フォルダのパス\"")
+    print("3. またはextract_prompts_standalone.batに")
+    print("   画像フォルダをドラッグ＆ドロップしてください")
+    print("\n何かキーを押すと終了します...")
+    
+    # コンソールがある場合のみ入力を待つ
+    if sys.stdin.isatty():
+        try:
+            # Windowsの場合
+            if sys.platform == 'win32':
+                import msvcrt
+                msvcrt.getch()
+            else:
+                # Unix系の場合
+                input()
+        except:
+            # エラーが発生した場合は何もしない
+            pass
+
+
 def main():
     """メイン処理"""
-    parser = argparse.ArgumentParser(
-        description='PNG画像からStable Diffusionのポジティブプロンプトを抽出します'
-    )
-    parser.add_argument(
-        'target_folder',
-        nargs='?',
-        default='.',
-        help='対象フォルダのパス（省略時は現在のディレクトリ）'
-    )
-    parser.add_argument(
-        '--workers',
-        type=int,
-        default=4,
-        help='並列処理のワーカー数（デフォルト: 4）'
-    )
-    
-    args = parser.parse_args()
-    
-    # フォルダパスを確認
-    target_folder = Path(args.target_folder).resolve()
-    if not target_folder.exists():
-        print(f"エラー: フォルダが存在しません: {target_folder}")
+    try:
+        parser = argparse.ArgumentParser(
+            description='PNG画像からStable Diffusionのポジティブプロンプトを抽出します'
+        )
+        parser.add_argument(
+            'target_folder',
+            nargs='?',
+            default='.',
+            help='対象フォルダのパス（省略時は現在のディレクトリ）'
+        )
+        parser.add_argument(
+            '--workers',
+            type=int,
+            default=4,
+            help='並列処理のワーカー数（デフォルト: 4）'
+        )
+        
+        args = parser.parse_args()
+        
+        # フォルダパスを確認
+        target_folder = Path(args.target_folder).resolve()
+        if not target_folder.exists():
+            show_error_and_wait(f"フォルダが存在しません: {target_folder}")
+            sys.exit(1)
+        
+        if not target_folder.is_dir():
+            show_error_and_wait(f"ディレクトリではありません: {target_folder}")
+            sys.exit(1)
+        
+        print(f"対象フォルダ: {target_folder}")
+        
+        # 処理実行
+        processor = PromptProcessor(target_folder, max_workers=args.workers)
+        output_file, success_count, error_count, elapsed_time = processor.process_folder()
+        
+        # PNG画像が見つからなかった場合の処理
+        if success_count == 0 and error_count == 0:
+            show_error_and_wait(
+                f"指定されたフォルダにPNG画像が見つかりませんでした。\n"
+                f"フォルダ: {target_folder}\n\n"
+                f"PNG形式の画像ファイルが含まれているか確認してください。"
+            )
+            sys.exit(1)
+        
+        # 処理完了後、少し待機（コンソールがある場合のみ）
+        if sys.stdin.isatty():
+            print("\n処理が完了しました。何かキーを押すと終了します...")
+            try:
+                if sys.platform == 'win32':
+                    import msvcrt
+                    msvcrt.getch()
+                else:
+                    input()
+            except:
+                pass
+            
+    except Exception as e:
+        show_error_and_wait(f"予期しないエラーが発生しました:\n{str(e)}")
         sys.exit(1)
-    
-    if not target_folder.is_dir():
-        print(f"エラー: ディレクトリではありません: {target_folder}")
-        sys.exit(1)
-    
-    print(f"対象フォルダ: {target_folder}")
-    
-    # 処理実行
-    processor = PromptProcessor(target_folder, max_workers=args.workers)
-    processor.process_folder()
 
 
 if __name__ == '__main__':
